@@ -11,6 +11,7 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
@@ -27,13 +28,20 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     public BallsSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         getHolder().addCallback(this);//получить холдер и повесить на него обработчик
-        objects.add(new Ball(50, 100, 100));
-    }
 
+
+    }
+    public void createBall() {
+        Random random = new Random();
+        int randomRadius = random.nextInt(10) * 10 + 50;
+        int randomX = random.nextInt((getWidth() - 3 * randomRadius) / 10) * 10 + randomRadius;
+        int randomY = random.nextInt((getHeight() - 3 * randomRadius) / 10) * 10 + randomRadius;
+        objects.add(new Ball(randomRadius, randomX, randomY));
+    }
     class DrawThread extends Thread {
-        float x = 700, y = 600, dx1, dy1, dx2, dy2;
-        Random r = new Random();
-        Paint p = new Paint();
+        //float x = 700, y = 600, dx1, dy1, dx2, dy2;
+        //Random r = new Random();
+        //Paint p = new Paint();
         boolean runFlag = true;
 
 
@@ -49,16 +57,25 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
             super.run();
 
             //выполняем цикл пока (рисуем кадры) включен флаг
+            synchronized (objects) {
+                if (objects.size() < 2) {
+                    view.createBall();
+                    view.createBall();
+                }
+            }
             while (runFlag){
                 Canvas c = holder.lockCanvas();//фиксируем канву //получаем управление над холстом
                 if (c != null) {
-                    for (GeometricObject object : view.objects) {
+                    c.drawColor(Color.WHITE);
+                    for (GeometricObject object : objects) { //почему не просто objects?
                         object.move(view);
                         object.draw(c);
                     }
+
+                    //Log.d("mytag", objects.size() + " rhpoherg");
                     holder.unlockCanvasAndPost(c);
                     try {
-                        Thread.sleep(100); }
+                        Thread.sleep(50); }
                     catch (InterruptedException e) {}
                 }
 
@@ -98,11 +115,11 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         }
     }
 
-    @Override
+    /*@Override
     public boolean onTouchEvent(MotionEvent event) {
         //
         return true;
-    }
+    }*/
 
     @Override
     public void surfaceRedrawNeeded(@NonNull SurfaceHolder holder) {}

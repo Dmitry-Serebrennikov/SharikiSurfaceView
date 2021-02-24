@@ -7,22 +7,24 @@ import android.view.SurfaceView;
 import java.util.Random;
 
 public abstract class GeometricObject {
-    protected float x, y, width, heigth;
+    protected int x, y, width, heigth, dx, dy;
 
     protected abstract int getColor();
 
     Random random = new Random();
     Paint paint = new Paint();
 
-    protected boolean isCollidedWithObject(GeometricObject g1) {
-         return (getLeft() < g1.getRight() && getRight() > g1.getLeft() &&
-                 getTop() < g1.getBot() && getBot() > g1.getTop());
+    protected boolean isCollidedWithObjectHorizontal(GeometricObject g1) {
+         return getLeft() < g1.getRight() && getRight() > g1.getLeft();
+    }
+    protected boolean isCollidedWithObjectVertical(GeometricObject g1) {
+        return getTop() < g1.getBot() && getBot() > g1.getTop();
     }
     protected boolean isCollideWithHorizontalBorder(SurfaceView map) {
-        return getLeft() <= 0 || getRight() >= map.getWidth();
+        return getLeft() <= Math.abs(dx) || getRight() >= map.getWidth() - Math.abs(dx);
     }
     protected boolean isCollideWithVerticalBorder(SurfaceView map) {
-        return getTop() <= 0 || getBot() >= map.getHeight();
+        return getTop() <= Math.abs(dy) || getBot() >= map.getHeight() - Math.abs(dy);
     }
     public abstract void move(BallsSurfaceView map);
     public float getTop() {return y;}
