@@ -1,5 +1,6 @@
 package com.example.sharikisurfaceview;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -11,7 +12,9 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -19,25 +22,55 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callback2 {
+public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callback2, View.OnTouchListener {
     //сайт со звуками - zapsplat
     DrawThread thread;
+    Activity context;
+    int rectWidth = 300, rectHeight = 300;
     //Display display;
     public List<GeometricObject> objects = new ArrayList<GeometricObject>();
 
     public BallsSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         getHolder().addCallback(this);//получить холдер и повесить на него обработчик
-
-
+        this.context = (Activity) context;
+        setOnTouchListener(this);
     }
-    public void createBall() {
+    public Ball createBall() {
         Random random = new Random();
         int randomRadius = random.nextInt(10) * 10 + 50;
         int randomX = random.nextInt((getWidth() - 3 * randomRadius) / 10) * 10 + randomRadius;
         int randomY = random.nextInt((getHeight() - 3 * randomRadius) / 10) * 10 + randomRadius;
-        objects.add(new Ball(randomRadius, randomX, randomY));
+        Ball ball = new Ball(randomRadius, randomX, randomY, context);
+        //objects.add(ball);
+        for (GeometricObject obj : objects) {
+            if (!ball.equals(obj) && (ball.isCollidedWithObjectHorizontal(obj) || ball.isCollidedWithObjectVertical(obj))) {
+                ball = createBall();
+                return ball;
+            }
+        }
+        objects.add(ball);
+
+        return ball;
     }
+
+    public void createRectangle() {
+        int x = getWidth() / 2 - rectWidth / 2;
+        int y = getHeight() / 2 - rectHeight / 2;
+        objects.add(new Rectangle(x, y, rectWidth, rectHeight, R.color.rect_gray, context));
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        for (GeometricObject obj : objects) {
+            if (obj instanceof Rectangle){
+                obj.setX((int) (event.getX() - rectWidth / 2));
+                obj.setY((int) (event.getY() - rectHeight / 2));
+            }
+        }
+        return true;
+    }
+
     class DrawThread extends Thread {
         //float x = 700, y = 600, dx1, dy1, dx2, dy2;
         //Random r = new Random();
@@ -58,9 +91,12 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
             //выполняем цикл пока (рисуем кадры) включен флаг
             synchronized (objects) {
-                if (objects.size() < 2) {
-                    view.createBall();
-                    view.createBall();
+
+                if (objects.size() == 0) {
+                    createRectangle();
+                    for (int i = 0; i < 2; i++) {
+                        view.createBall();
+                    }
                 }
             }
             while (runFlag){
@@ -69,15 +105,36 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                     c.drawColor(Color.WHITE);
                     for (GeometricObject object : objects) { //почему не просто objects?
                         object.move(view);
-                        object.draw(c);
+                        object.draw(c, context);
                     }
-
+                    int currIndex = -1;
+                    runFlag = true;
+                    for (GeometricObject object : objects) {
+                        if (object instanceof Ball) {
+                            int colorIndex = ((Ball) object).getColorIndex();
+                            if (currIndex < 0) {
+                                currIndex = colorIndex;
+                                continue;
+                            }
+                            else if (currIndex != colorIndex) {
+                                runFlag = true;
+                            }
+                        }
+                    }
+                    if (!runFlag) {
+                        context.runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(context, "Game over!", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
                     //Log.d("mytag", objects.size() + " rhpoherg");
                     holder.unlockCanvasAndPost(c);
                     try {
                         Thread.sleep(50); }
                     catch (InterruptedException e) {}
                 }
+
 
 
 
@@ -112,6 +169,8 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 }*/
 
             }
+
+
         }
     }
 

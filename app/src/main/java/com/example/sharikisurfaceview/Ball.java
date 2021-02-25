@@ -1,5 +1,6 @@
 package com.example.sharikisurfaceview;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.view.SurfaceView;
 
@@ -8,7 +9,7 @@ import java.util.Random;
 public class Ball extends GeometricObject{
     protected int radius;
     //protected int x, y, dx, dy, dx1, dy1, dx2, dy2;
-    protected final int[] colors = {R.color.red, R.color.orange, R.color.yellow, R.color.green, R.color.blue, R.color.dark_blue, R.color.purple};
+    protected int[] colors = {R.color.red, R.color.orange, R.color.yellow, R.color.green, R.color.blue, R.color.dark_blue, R.color.purple};
     protected int currentColor;
     protected float screenWidth, screenHeight; //screenResolution //
     protected int moveSpeed; //
@@ -20,7 +21,7 @@ public class Ball extends GeometricObject{
         protected Point point;
          */
 
-    public Ball(int radius, int x, int y) {
+    public Ball(int radius, int x, int y, Context context) {
         this.radius = radius;
         this.width = 2 * radius;
         this.heigth = 2 * radius;
@@ -28,10 +29,12 @@ public class Ball extends GeometricObject{
         this.y = y;
         dx = random.nextInt(10) * 10 - 50;
         dy = random.nextInt(10) * 10 - 50;
-        currentColor = colors[random.nextInt(colors.length)];
+        currentColor = random.nextInt(colors.length);
+        currentColorId = colors[currentColor];
+
         //currentColor = colors[ThreadLocalRandom.current().nextInt(1, colors.length)]; // по документации лучше использовать при работе с потоками
         moveSpeed = (int) random.nextFloat() * 20 - 5; //
-        paint.setColor(colors[random.nextInt(colors.length)]);
+        paint.setColor(getColor(context));
     }
 
 
@@ -62,18 +65,24 @@ public class Ball extends GeometricObject{
         return super.isCollidedWithObjectVertical(g1);
     }
 
-    public int nextColor() {
+    public void nextColor() {
         currentColor = ++currentColor % colors.length;
-        return colors[currentColor];
+        //paint.setColor(colors[currentColor]);
+        currentColorId = colors[currentColor];
     }
-
+    public int getColorIndex() {
+        return currentColor;
+    }
     public void move(BallsSurfaceView map){
         boolean isChangedX = false, isChangedY = false;
+
         if(isCollideWithHorizontalBorder(map)) {
+            nextColor();
             dx = -dx;
             isChangedX = true;
         }
         if(isCollideWithVerticalBorder(map)) {
+            nextColor();
             dy = -dy;
             isChangedY = true;
         }
@@ -90,7 +99,8 @@ public class Ball extends GeometricObject{
     }
 
     @Override
-    public void draw(Canvas c) {
+    public void draw(Canvas c, Context context) {
+        paint.setColor(getColor(context));
         c.drawCircle(x, y, radius, paint);
         //c.drawRect(float get);
     }
@@ -109,8 +119,4 @@ public class Ball extends GeometricObject{
         return radius;
     }
 
-    @Override
-    protected int getColor() {
-        return 0;
-    }
 }
