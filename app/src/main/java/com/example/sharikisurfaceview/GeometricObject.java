@@ -7,17 +7,17 @@ import android.view.SurfaceView;
 
 import androidx.core.content.ContextCompat;
 
-import java.util.Random;
-
 public abstract class GeometricObject {
     protected int x, y, width, heigth, dx, dy;
 
     protected int currentColorId;
-    protected int getColor(Context context){
-        return ContextCompat.getColor(context, currentColorId);
-    };
 
-    Random random = new Random();
+    protected int getColor(Context context) {
+        return ContextCompat.getColor(context, currentColorId);
+    }
+
+    ;
+
     Paint paint = new Paint();
 
     public void setX(int x) {
@@ -29,22 +29,43 @@ public abstract class GeometricObject {
     }
 
     protected boolean isCollidedWithObjectHorizontal(GeometricObject g1) {
-         return getLeft() < g1.getRight() && getRight() > g1.getLeft();
+
+        return (((getRight() + dx) >= g1.getLeft() && (getLeft() + dx) < g1.getLeft())
+                || (getLeft() + dx) <= g1.getRight() && (getRight() + dx) > g1.getRight())
+                && (getBot() > g1.getTop() && getTop() < g1.getBot());
     }
+
     protected boolean isCollidedWithObjectVertical(GeometricObject g1) {
-        return getTop() < g1.getBot() && getBot() > g1.getTop();
+        return ((getBot() + dy) >= g1.getTop() && (getTop() + dx) < g1.getTop()
+                || (getTop() + dy) <= g1.getBot() && getBot() + dy > g1.getBot())
+                && (getRight() + dx >= g1.getLeft() && getLeft() + dy <= g1.getRight());
     }
+
     protected boolean isCollideWithHorizontalBorder(SurfaceView map) {
         return getLeft() <= Math.abs(dx) || getRight() >= map.getWidth() - Math.abs(dx);
     }
+
     protected boolean isCollideWithVerticalBorder(SurfaceView map) {
         return getTop() <= Math.abs(dy) || getBot() >= map.getHeight() - Math.abs(dy);
     }
+
     public abstract void move(BallsSurfaceView map);
-    public float getTop() {return y;}
-    public float getBot() {return y + heigth;}
-    public float getLeft() {return x;}
-    public float getRight() {return x + width;}
+
+    public float getTop() {
+        return y;
+    }
+
+    public float getBot() {
+        return y + heigth;
+    }
+
+    public float getLeft() {
+        return x;
+    }
+
+    public float getRight() {
+        return x + width;
+    }
 
     public abstract void draw(Canvas c, Context context);
 }
