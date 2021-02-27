@@ -8,7 +8,7 @@ import java.util.Random;
 
 public class Ball extends GeometricObject{
     protected int radius;
-    //protected int x, y, dx, dy, dx1, dy1, dx2, dy2;
+    protected int oldDx, oldDy;//x, y, dx, dy, dx1, dy1, dx2, dy2;
     protected int[] colors = {R.color.red, R.color.orange, R.color.yellow, R.color.green, R.color.blue, R.color.dark_blue, R.color.purple};
     protected int currentColor;
     protected float screenWidth, screenHeight; //screenResolution //
@@ -31,6 +31,8 @@ public class Ball extends GeometricObject{
         dy = random.nextInt(10) * 10 - 50;
         currentColor = random.nextInt(colors.length);
         currentColorId = colors[currentColor];
+        oldDx = dx;
+        oldDy = dy;
 
         //currentColor = colors[ThreadLocalRandom.current().nextInt(1, colors.length)]; // по документации лучше использовать при работе с потоками
         moveSpeed = (int) random.nextFloat() * 20 - 5; //
@@ -39,13 +41,34 @@ public class Ball extends GeometricObject{
 
 
     @Override //
-    public float getTop() {return y - radius;}
+    public int getTop() {return (int) Math.round(y -radius*0.5 /*(radius + radius / Math.sqrt(2))/2*/);}
     @Override
-    public float getBot() {return y + radius;}
+    public int getBot() {return (int) Math.round(y + radius*0.5 /*(radius + radius / Math.sqrt(2))/2*/);}
     @Override
-    public float getLeft() {return x - radius;}
+    public int getLeft() {return (int) Math.round(x - radius*0.5/*(radius + radius / Math.sqrt(2))/2*/);}
     @Override
-    public float getRight() {return x + radius;}
+    public int getRight() {return (int) Math.round(x + radius*0.5 /*(radius + radius / Math.sqrt(2))/2*/);}
+
+    public boolean isBallsColliding(Ball ball)
+    {
+        int xd = x+oldDx - ball.x-ball.oldDx;
+        int yd = y+oldDy - ball.y-ball.oldDy;
+
+        float sumRadius = getRadius() + ball.getRadius();
+        float sqrRadius = sumRadius * sumRadius;
+
+        float distSqr = (xd * xd) + (yd * yd);
+
+        return distSqr <= sqrRadius;
+    }
+
+    public void ballsCollide(Ball ball){
+        dx=ball.oldDx;
+        dy=ball.oldDy;
+        ball.dx = oldDx;
+        ball.dy = oldDy;
+    }
+/*
 
     @Override
     protected boolean isCollidedWithObjectHorizontal(GeometricObject g1) {
@@ -64,6 +87,7 @@ public class Ball extends GeometricObject{
         }
         return super.isCollidedWithObjectVertical(g1);
     }
+*/
 
     public void nextColor() {
         currentColor = ++currentColor % colors.length;
@@ -86,12 +110,22 @@ public class Ball extends GeometricObject{
             dy = -dy;
             isChangedY = true;
         }
+        oldDx = dx;
+        oldDy = dy;
         for (GeometricObject obj : map.objects) {
-            if (!isChangedX && !obj.equals(this) && isCollidedWithObjectHorizontal(obj)) {
-                dx = -dx;
+            if(obj.equals(this))
+                continue;
+            if (obj instanceof Ball && isBallsColliding((Ball) obj)) {
+                ballsCollide((Ball) obj);
             }
-            if (!isChangedY && !obj.equals(this) && isCollidedWithObjectVertical(obj)) {
-                dy = -dy;
+            else {
+                if (!isChangedX && isCollidedWithObjectHorizontal(obj)) {
+                    dx = -dx;
+                }
+
+                if (!isChangedY && isCollidedWithObjectVertical(obj)) {
+                    dy = -dy;
+                }
             }
         }
         x += dx;

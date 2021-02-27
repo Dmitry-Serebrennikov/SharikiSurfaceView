@@ -51,19 +51,19 @@ public abstract class GeometricObject {
 
     public abstract void move(BallsSurfaceView map);
 
-    public float getTop() {
+    public int getTop() {
         return y;
     }
 
-    public float getBot() {
+    public int getBot() {
         return y + heigth;
     }
 
-    public float getLeft() {
+    public int getLeft() {
         return x;
     }
 
-    public float getRight() {
+    public int getRight() {
         return x + width;
     }
 

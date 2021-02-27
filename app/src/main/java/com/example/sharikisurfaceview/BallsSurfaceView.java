@@ -108,7 +108,7 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                         object.draw(c, context);
                     }
                     int currIndex = -1;
-                    runFlag = true;
+                    runFlag = false;
                     for (GeometricObject object : objects) {
                         if (object instanceof Ball) {
                             int colorIndex = ((Ball) object).getColorIndex();
