@@ -6,6 +6,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.media.AudioAttributes;
+import android.media.SoundPool;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -26,17 +28,37 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     //сайт со звуками - zapsplat
     DrawThread thread;
     Activity context;
-    int rectWidth = 300, rectHeight = 300;
+    SoundPool soundpool;
+    int rectWidth = 250, rectHeight = 250;
     //Display display;
-    public List<GeometricObject> objects = new ArrayList<GeometricObject>();
+    //public List<GeometricObject> objects = new ArrayList<GeometricObject>();
 
     public BallsSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
         getHolder().addCallback(this);//получить холдер и повесить на него обработчик
         this.context = (Activity) context;
         setOnTouchListener(this);
+
+        AudioAttributes attributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        soundpool = new SoundPool.Builder()
+                .setAudioAttributes(attributes)
+                .build();
+
+        soundpool.load(context, R.raw.sound, 1);
     }
-    public Ball createBall() {
+
+    public SoundPool getSoundpool() {
+        return soundpool;
+    }
+
+    public DrawThread getThread() {
+        return thread;
+    }
+
+    /*public Ball createBall() {
         Random random = new Random();
         int randomRadius = random.nextInt(10) * 10 + 50;
         int randomX = random.nextInt((getWidth() - 3 * randomRadius) / 10) * 10 + randomRadius;
@@ -58,15 +80,20 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         int x = getWidth() / 2 - rectWidth / 2;
         int y = getHeight() / 2 - rectHeight / 2;
         objects.add(new Rectangle(x, y, rectWidth, rectHeight, R.color.rect_gray, context));
-    }
+    }*/
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        for (GeometricObject obj : objects) {
-            if (obj instanceof Rectangle){
-                obj.setX((int) (event.getX() - rectWidth / 2));
-                obj.setY((int) (event.getY() - rectHeight / 2));
+        if (thread.runFlag) {
+            for (GeometricObject obj : thread.objects) {
+                if (obj instanceof Rectangle){
+                    obj.setX((int) (event.getX() - rectWidth / 2));
+                    obj.setY((int) (event.getY() - rectHeight / 2));
+                }
             }
+        } else if (event.getAction() == MotionEvent.ACTION_DOWN) { //
+            thread = new DrawThread(getHolder(), this); //перенесли
+            thread.start();
         }
         return true;
     }
@@ -76,15 +103,41 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         //Random r = new Random();
         //Paint p = new Paint();
         boolean runFlag = true;
-
+        public List<GeometricObject> objects = new ArrayList<GeometricObject>();
+        SurfaceHolder holder;
+        BallsSurfaceView view;
 
         // в конструкторе нужно передать holder для дальнейшего доступа к канве
         public DrawThread(SurfaceHolder holder, BallsSurfaceView view){
             this.holder = holder;
             this.view = view;
         }
-        SurfaceHolder holder;
-        BallsSurfaceView view;
+
+        public Ball createBall() {
+            Random random = new Random();
+            int randomRadius = random.nextInt(10) * 10 + 50;
+            int randomX = random.nextInt((getWidth() - 3 * randomRadius) / 10) * 10 + randomRadius;
+            int randomY = random.nextInt((getHeight() - 3 * randomRadius) / 10) * 10 + randomRadius;
+            Ball ball = new Ball(randomRadius, randomX, randomY, context);
+            //objects.add(ball);
+            for (GeometricObject obj : objects) {
+                if (!ball.equals(obj) && (ball.isCollidedWithObjectHorizontal(obj) || ball.isCollidedWithObjectVertical(obj))) {
+                    ball = createBall();
+                    return ball;
+                }
+            }
+            objects.add(ball);
+
+            return ball;
+        }
+
+        public void createRectangle() {
+            int x = getWidth() / 2 - rectWidth / 2;
+            int y = getHeight() / 2 - rectHeight / 2;
+            objects.add(new Rectangle(x, y, rectWidth, rectHeight, R.color.rect_gray, context));
+        }
+
+
         @Override
         public void run() { //был onDraw -> получаем по-другому -- пока происходит отрисовка кадров на поверхности, запущен метод run
             super.run();
@@ -95,7 +148,7 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 if (objects.size() == 0) {
                     createRectangle();
                     for (int i = 0; i < 2; i++) {
-                        view.createBall();
+                        createBall();
                     }
                 }
             }
