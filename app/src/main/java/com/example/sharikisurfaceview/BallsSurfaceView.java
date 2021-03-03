@@ -30,8 +30,6 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
     Activity context;
     SoundPool soundpool;
     int rectWidth = 250, rectHeight = 250;
-    //Display display;
-    //public List<GeometricObject> objects = new ArrayList<GeometricObject>();
 
     public BallsSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,30 +56,6 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         return thread;
     }
 
-    /*public Ball createBall() {
-        Random random = new Random();
-        int randomRadius = random.nextInt(10) * 10 + 50;
-        int randomX = random.nextInt((getWidth() - 3 * randomRadius) / 10) * 10 + randomRadius;
-        int randomY = random.nextInt((getHeight() - 3 * randomRadius) / 10) * 10 + randomRadius;
-        Ball ball = new Ball(randomRadius, randomX, randomY, context);
-        //objects.add(ball);
-        for (GeometricObject obj : objects) {
-            if (!ball.equals(obj) && (ball.isCollidedWithObjectHorizontal(obj) || ball.isCollidedWithObjectVertical(obj))) {
-                ball = createBall();
-                return ball;
-            }
-        }
-        objects.add(ball);
-
-        return ball;
-    }
-
-    public void createRectangle() {
-        int x = getWidth() / 2 - rectWidth / 2;
-        int y = getHeight() / 2 - rectHeight / 2;
-        objects.add(new Rectangle(x, y, rectWidth, rectHeight, R.color.rect_gray, context));
-    }*/
-
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (thread.runFlag) {
@@ -92,16 +66,13 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 }
             }
         } else if (event.getAction() == MotionEvent.ACTION_DOWN) { //
-            thread = new DrawThread(getHolder(), this); //перенесли
+            thread = new DrawThread(getHolder(), this);
             thread.start();
         }
         return true;
     }
 
     class DrawThread extends Thread {
-        //float x = 700, y = 600, dx1, dy1, dx2, dy2;
-        //Random r = new Random();
-        //Paint p = new Paint();
         boolean runFlag = true;
         public List<GeometricObject> objects = new ArrayList<GeometricObject>();
         SurfaceHolder holder;
@@ -119,7 +90,6 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
             int randomX = random.nextInt((getWidth() - 3 * randomRadius) / 10) * 10 + randomRadius;
             int randomY = random.nextInt((getHeight() - 3 * randomRadius) / 10) * 10 + randomRadius;
             Ball ball = new Ball(randomRadius, randomX, randomY, context);
-            //objects.add(ball);
             for (GeometricObject obj : objects) {
                 if (!ball.equals(obj) && (ball.isCollidedWithObjectHorizontal(obj) || ball.isCollidedWithObjectVertical(obj))) {
                     ball = createBall();
@@ -144,7 +114,6 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
             //выполняем цикл пока (рисуем кадры) включен флаг
             synchronized (objects) {
-
                 if (objects.size() == 0) {
                     createRectangle();
                     for (int i = 0; i < 2; i++) {
@@ -188,50 +157,11 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                     catch (InterruptedException e) {}
                 }
 
-
-
-
-                //если успешно захватили канву
-                /*if (c != null) {
-                    c.drawColor(Color.RED);
-
-                    //случайные блуждения - сдвигаем координаты шарика в случайные стороны
-                    x += r.nextFloat() * 20 - 5; // меняем координаты
-                    y += r.nextFloat() * 20 - 5;
-                    c.drawCircle(x, y, 100, p);// рисуем круг
-                    holder.unlockCanvasAndPost(c); // нарисовали и отпускаем канву
-                    *//*
-                    *   Для начала сделайте движущийся шарик, который при ударении о стенки меняет цвет. Достаточно двигаться по одной координате
-                        Второй шаг: два шарика и движение по всему полю в случайном (изначально) направлении
-                      * набор цветов хранить в ресурсах
-                      * параметры хранить в массиве
-                      * шарики меняют цвет при столкновении со стенками
-                      * шарик может двигаться по вертикали/горизонтали
-                      *
-                      * 2 шарики, создаются в разных местах
-                      * удар о стенку - меняются просто направлении при столкновении
-                      * при горизонтали - dx
-                      * при вертикали - dy
-                      *
-                      * столкновение шаров по измерению их радиусов
-                    * *//*
-                    // нужна пауза на каждом кадре
-                    try {
-                        Thread.sleep(100); }
-                    catch (InterruptedException e) {}
-                }*/
-
             }
 
 
         }
     }
-
-    /*@Override
-    public boolean onTouchEvent(MotionEvent event) {
-        //
-        return true;
-    }*/
 
     @Override
     public void surfaceRedrawNeeded(@NonNull SurfaceHolder holder) {}
@@ -241,7 +171,7 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         thread = new DrawThread(holder, this); //перенесли
         thread.start();
 
-        Log.d("mytag", "DrawThread is running");
+        Log.d("mytag", "DrawThread is running"); //
     }
 
     @Override
