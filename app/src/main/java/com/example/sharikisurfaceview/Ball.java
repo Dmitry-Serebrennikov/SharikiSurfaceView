@@ -26,24 +26,22 @@ public class Ball extends GeometricObject{
         oldDx = dx;
         oldDy = dy;
 
-        //currentColor = colors[ThreadLocalRandom.current().nextInt(1, colors.length)]; // по документации лучше использовать при работе с потоками
         paint.setColor(getColor(context));
     }
 
 
-    @Override //
-    public int getTop() {return (int) Math.round(y -radius*0.75 /*(radius + radius / Math.sqrt(2))/2*/);} // что делать с этим
     @Override
-    public int getBot() {return (int) Math.round(y + radius*0.75 /*(radius + radius / Math.sqrt(2))/2*/);}
+    public int getTop() {return (int) Math.round(y - radius * 0.75 /*(radius + radius / Math.sqrt(2))/2*/);}
     @Override
-    public int getLeft() {return (int) Math.round(x - radius*0.75/*(radius + radius / Math.sqrt(2))/2*/);}
+    public int getBot() {return (int) Math.round(y + radius * 0.75 /*(radius + radius / Math.sqrt(2))/2*/);}
     @Override
-    public int getRight() {return (int) Math.round(x + radius*0.75 /*(radius + radius / Math.sqrt(2))/2*/);}
+    public int getLeft() {return (int) Math.round(x - radius * 0.75/*(radius + radius / Math.sqrt(2))/2*/);}
+    @Override
+    public int getRight() {return (int) Math.round(x + radius * 0.75 /*(radius + radius / Math.sqrt(2))/2*/);}
 
-    public boolean isBallsColliding(Ball ball) //
-    {
-        int xd = x+oldDx - ball.x-ball.oldDx;
-        int yd = y+oldDy - ball.y-ball.oldDy;
+    public boolean isBallsColliding(Ball ball) {
+        int xd = x + oldDx - ball.x-ball.oldDx;
+        int yd = y + oldDy - ball.y-ball.oldDy;
 
         float sumRadius = getRadius() + ball.getRadius();
         float sqrRadius = sumRadius * sumRadius;
@@ -53,7 +51,7 @@ public class Ball extends GeometricObject{
         return distSqr <= sqrRadius;
     }
 
-    public void ballsCollide(Ball ball){
+    public void ballsCollide(Ball ball) {
         dx=ball.oldDx;
         dy=ball.oldDy;
         ball.dx = oldDx;
@@ -76,16 +74,18 @@ public class Ball extends GeometricObject{
             nextColor();
             dx = -dx;
             isChangedX = true;
+            map.getSoundpool().play(2, 1, 1, 1, 0, 1);
         }
         if(isCollideWithVerticalBorder(map)) {
             nextColor();
             dy = -dy;
             isChangedY = true;
+            map.getSoundpool().play(2, 1, 1, 1, 0, 1);
         }
         oldDx = dx;
         oldDy = dy;
         for (GeometricObject obj : map.thread.objects) {
-            if(obj.equals(this))
+            if (obj.equals(this))
                 continue;
             if (obj instanceof Ball && isBallsColliding((Ball) obj)) {
                 ballsCollide((Ball) obj);

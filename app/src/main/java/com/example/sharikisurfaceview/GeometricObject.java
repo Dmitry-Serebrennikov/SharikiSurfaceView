@@ -10,10 +10,10 @@ import androidx.core.content.ContextCompat;
 public abstract class GeometricObject {
     protected int x, y, width, heigth, dx, dy;
 
-    protected int currentColorId; //
+    protected int currentColorId;
 
     protected int getColor(Context context) {
-        return ContextCompat.getColor(context, currentColorId); //
+        return ContextCompat.getColor(context, currentColorId);
     }
 
     Paint paint = new Paint();
@@ -30,21 +30,21 @@ public abstract class GeometricObject {
 
         return (((getRight() + dx) >= g1.getLeft() && (getLeft() + dx) < g1.getLeft())
                 || (getLeft() + dx) <= g1.getRight() && (getRight() + dx) > g1.getRight())
-                && (getBot() > g1.getTop() && getTop() < g1.getBot()); //
+                && (getBot() > g1.getTop() && getTop() < g1.getBot());
     }
 
     protected boolean isCollidedWithObjectVertical(GeometricObject g1) {
-        return ((getBot() + dy) >= g1.getTop() && (getTop() + dx) < g1.getTop()
+        return ((getBot() + dy) >= g1.getTop() && (getTop() + dy) < g1.getTop()
                 || (getTop() + dy) <= g1.getBot() && getBot() + dy > g1.getBot())
-                && (getRight() + dx >= g1.getLeft() && getLeft() + dy <= g1.getRight()); //
+                && (getRight() + dx >= g1.getLeft() && getLeft() + dx <= g1.getRight());
     }
 
     protected boolean isCollideWithHorizontalBorder(SurfaceView map) {
-        return getLeft() <= Math.abs(dx) || getRight() >= map.getWidth() - Math.abs(dx); //
+        return getLeft() <= Math.abs(dx) || getRight() >= map.getWidth() - Math.abs(dx);
     }
 
     protected boolean isCollideWithVerticalBorder(SurfaceView map) {
-        return getTop() <= Math.abs(dy) || getBot() >= map.getHeight() - Math.abs(dy); //
+        return getTop() <= Math.abs(dy) || getBot() >= map.getHeight() - Math.abs(dy);
     }
 
     public abstract void move(BallsSurfaceView map);

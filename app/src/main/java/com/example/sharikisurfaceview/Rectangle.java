@@ -6,7 +6,7 @@ import android.graphics.Paint;
 
 public class Rectangle extends GeometricObject {
 
-    public Rectangle(int x, int y, int width, int height, int color, Context context){ //context - what for
+    public Rectangle(int x, int y, int width, int height, int color, Context context){
         this.x = x;
         this.y = y;
         this.width = width;
@@ -17,7 +17,7 @@ public class Rectangle extends GeometricObject {
     }
 
     @Override
-    public void move(BallsSurfaceView map) { } //
+    public void move(BallsSurfaceView map) { }
 
     @Override
     public void draw(Canvas c, Context context) {

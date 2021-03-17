@@ -33,19 +33,22 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     public BallsSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        getHolder().addCallback(this);//получить холдер и повесить на него обработчик
+        getHolder().addCallback(this);
         this.context = (Activity) context;
         setOnTouchListener(this);
+
+        int MAX_STREAMS = 2;
 
         AudioAttributes attributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build();
         soundpool = new SoundPool.Builder()
-                .setAudioAttributes(attributes)
+                .setAudioAttributes(attributes).setMaxStreams(MAX_STREAMS)
                 .build();
 
-        soundpool.load(context, R.raw.sound, 1);
+        soundpool.load(context, R.raw.sound_balls_collision, 1);
+        soundpool.load(context, R.raw.sound_collison_with_border,  1);
     }
 
     public SoundPool getSoundpool() {
@@ -65,7 +68,7 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                     obj.setY((int) (event.getY() - rectHeight / 2));
                 }
             }
-        } else if (event.getAction() == MotionEvent.ACTION_DOWN) { //
+        } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
             thread = new DrawThread(getHolder(), this);
             thread.start();
         }
@@ -78,7 +81,6 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
         SurfaceHolder holder;
         BallsSurfaceView view;
 
-        // в конструкторе нужно передать holder для дальнейшего доступа к канве
         public DrawThread(SurfaceHolder holder, BallsSurfaceView view){
             this.holder = holder;
             this.view = view;
@@ -109,10 +111,9 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
 
         @Override
-        public void run() { //был onDraw -> получаем по-другому -- пока происходит отрисовка кадров на поверхности, запущен метод run
+        public void run() {
             super.run();
 
-            //выполняем цикл пока (рисуем кадры) включен флаг
             synchronized (objects) {
                 if (objects.size() == 0) {
                     createRectangle();
@@ -122,10 +123,10 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                 }
             }
             while (runFlag){
-                Canvas c = holder.lockCanvas();//фиксируем канву //получаем управление над холстом
+                Canvas c = holder.lockCanvas();
                 if (c != null) {
                     c.drawColor(Color.WHITE);
-                    for (GeometricObject object : objects) { //почему не просто objects?
+                    for (GeometricObject object : objects) {
                         object.move(view);
                         object.draw(c, context);
                     }
@@ -150,7 +151,7 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
                             }
                         });
                     }
-                    //Log.d("mytag", objects.size() + " rhpoherg");
+                    //Log.d("mytag", objects.size() + " objects");
                     holder.unlockCanvasAndPost(c);
                     try {
                         Thread.sleep(50); }
@@ -168,15 +169,14 @@ public class BallsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
-        thread = new DrawThread(holder, this); //перенесли
+        thread = new DrawThread(holder, this);
         thread.start();
 
-        Log.d("mytag", "DrawThread is running"); //
+        //Log.d("mytag", "DrawThread is running");
     }
 
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-        //при изменении конфигурации поверхности поток нужно перезапустить
         thread.runFlag = false;
         thread = new DrawThread(holder, this);
         thread.start();
