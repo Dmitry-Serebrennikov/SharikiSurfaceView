@@ -14,6 +14,8 @@ Borders, rect, 2 balls ("КАнва, Треды, 2 шара")
 ## Использована заготовка в качестве основы: ##
 https://github.com/ipetrushin/SurfaceViewColorChange
 
+## Демонстрация работы приложения: ##
+[Пример](https://github.com/Dmitry-Serebrennikov/SharikiSurfaceView/blob/master/Ballshoi_primer.mp4)
 ## Реализованы базовый функционал + варианты усложнения (доп. задачи): ##
 
 1.  Абстрактный класс GeometricObject, откуда наследуются классы Шарика (Ball) и Квадрата (Rectangle) - возможность в последующем усложнять и добавлять в игру новые действующие объекты.
